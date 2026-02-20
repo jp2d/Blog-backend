@@ -39,7 +39,7 @@ namespace Blog.Api.Controllers
                     Posts = u.Posts?.Select(p => new PostDto
                     {
                         id = p.Id,
-                        Titule = p.Titule,
+                        Title = p.Title,
                         Content = p.Content,
                         CreatedAt = p.CreatedAt
                     }).ToList()
@@ -69,7 +69,7 @@ namespace Blog.Api.Controllers
                 Posts = user.Posts?.Select(p => new PostDto
                 {
                     id = p.Id,
-                    Titule = p.Titule,
+                    Title = p.Title,
                     Content = p.Content,
                     CreatedAt = p.CreatedAt
                 }).ToList()
