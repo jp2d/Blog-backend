@@ -1,13 +1,11 @@
+using Blog.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json.Serialization;
-using Blog.Application;
-
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 #region Add services to the container.
 builder.Services.AddControllers()
@@ -21,7 +19,22 @@ builder.Services.AddControllers()
 #region Swagger 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Blog API", Version = "v1" });
+    c.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Insira o token JWT no campo abaixo. Exemplo: {seu token}"
+    });
+
+    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
+    });
+});
 #endregion
 
 #region Application
@@ -50,9 +63,19 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
 });
+#endregion
 
-builder.Services.AddAuthentication();
-builder.Services.AddControllers();
+#region Política de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000", "https://localhost:3000") // endereço do frontend
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 #endregion
 
 var app = builder.Build();
@@ -67,12 +90,14 @@ if (app.Environment.IsProduction() || app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog API v1");
-        c.RoutePrefix = string.Empty; // Swagger abre na raiz
+        c.RoutePrefix = string.Empty;
     });
 }
 #endregion
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 

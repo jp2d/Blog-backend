@@ -21,15 +21,10 @@ namespace Blog.Api.Controllers
             return Ok(posts);
         }
 
-        [HttpGet("GetAllPostsByAuthorId")]
+        [HttpGet("GetAllPostsByAuthorId/{id}")]
         [Authorize]
         public async Task<IActionResult> GetAllPostsByAuthorId(int id)
-        {
-            var _user = HttpContext.User;
-
-            if (_user.Identity is not { IsAuthenticated: true })
-                return Unauthorized();
-
+        {   
             var posts = await _postService.GetAllPostsByAuthorId(id);
             return Ok(posts);
         }
@@ -48,7 +43,7 @@ namespace Blog.Api.Controllers
         {
             var post = new Post
             {
-                Titule = dto.Titule,
+                Title = dto.Title,
                 Content = dto.Content,
                 UserId = dto.UserId
             };
@@ -63,8 +58,10 @@ namespace Blog.Api.Controllers
         {
             var post = new Post
             {
-                Titule = postDto.Titule,
-                Content = postDto.Content
+                Id = postDto.id,
+                Title = postDto.Title,
+                Content = postDto.Content,
+                UserId = postDto.UserId
             };
 
             var updatedPost = await _postService.UpdatePost(post);

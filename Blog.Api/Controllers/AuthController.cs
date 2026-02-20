@@ -1,4 +1,5 @@
-﻿using Blog.Application.Interfaces;
+﻿using Blog.Api.DTO;
+using Blog.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Api.Controllers
@@ -15,11 +16,20 @@ namespace Blog.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto login)
         {
-            var token = await _authService.Authenticate(email, password);
+            var user = await _authService.GetUserByEmail(login.email);
+            var _userDto = new UserDTO
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role
+            };
 
-            return !string.IsNullOrEmpty(token) ? Ok(new { token }) : Unauthorized();
+            var token = await _authService.Authenticate(login.email, login.password);
+
+            return !string.IsNullOrEmpty(token) ? Ok(new { token, profile = _userDto }) : Unauthorized();
         }
     }
 }

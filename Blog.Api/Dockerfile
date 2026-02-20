@@ -16,7 +16,7 @@ COPY ["Blog.Api/Blog.Api.csproj", "Blog.Api/"]
 COPY ["Blog.Application/Blog.Application.csproj", "Blog.Application/"]
 COPY ["Blog.Domain/Blog.Domain.csproj", "Blog.Domain/"]
 COPY ["Blog.Infrastructure/Blog.Infrastructure.csproj", "Blog.Infrastructure/"]
-RUN dotnet restore "./Blog.Api.csproj"
+RUN dotnet restore "Blog.Api/Blog.Api.csproj"
 COPY . .
 WORKDIR "/src/Blog.Api"
 RUN dotnet build "Blog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
