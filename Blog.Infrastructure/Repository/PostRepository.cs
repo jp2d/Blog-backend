@@ -40,8 +40,15 @@ namespace Blog.Infrastructure.Repository
 
         public async Task<Post> UpdateAsync(Post post)
         {
-            post.UpdatedAt = DateTime.UtcNow;
-            _context.Posts.Update(post);
+            var existingPost = await _context.Posts.FindAsync(post.Id);
+            if (existingPost == null)
+                throw new Exception("Post não encontrado");
+                        
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.UpdatedAt = DateTime.UtcNow;
+
+            _context.Posts.Update(existingPost);
             await _context.SaveChangesAsync();
             return post;
         }
