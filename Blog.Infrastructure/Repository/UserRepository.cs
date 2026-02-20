@@ -39,7 +39,22 @@ namespace Blog.Infrastructure.Repository
 
         public async Task<User> UpdateAsync(User user)
         {
-            _context.Users.Update(user);
+            var existingUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == user.Id);
+            if (existingUser == null)
+                throw new Exception("Usuário não encontrado");
+
+            if (string.IsNullOrEmpty(user.PasswordHash))
+            {
+                user.PasswordHash = existingUser.PasswordHash;
+            }
+            else if (!BCrypt.Net.BCrypt.Verify(user.PasswordHash, existingUser.PasswordHash))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+            }
+
+            _context.Attach(user);
+            _context.Entry(user).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
             return user;
         }
